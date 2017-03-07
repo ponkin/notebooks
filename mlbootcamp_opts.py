@@ -14,7 +14,7 @@ import xgboost as xgb
 
 X_train = pd.read_csv('files/x_train.csv', sep=';').drop(['doReturnOnLowerLevels'], axis=1)
 y_train = pd.read_csv('files/y_train.csv', sep=';', header=None)
-pipe = make_pipeline(StandardScaler(), PCA(n_components=6, whiten=True))
+pipe = make_pipeline(StandardScaler(), PCA(n_components=8, whiten=True))
 X_train_trans = pipe.fit_transform(X_train)
 y_train_trans = y_train[0].values
 X_train1, X_test1, y_train1, y_test1 = train_test_split(X_train_trans, y_train_trans, test_size=0.5, random_state=17)
@@ -24,7 +24,7 @@ space = {
     'min_child_weight': hp.quniform('x_min_child', 1, 10, 1),
     'subsample': hp.uniform('x_subsample', 0.7, 1),
     'n_estimators': hp.choice('x_n_estimators', np.arange(800, 10000, dtype=int)),
-    'learning_rate': hp.uniform('x_learning_rate', 0.001, 0.3)
+    'learning_rate': hp.uniform('x_learning_rate', 0.0001, 0.3)
 }
 
 spaceSvm = {
