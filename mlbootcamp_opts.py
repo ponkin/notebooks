@@ -6,13 +6,15 @@ from sklearn.model_selection import train_test_split, cross_val_score, Stratifie
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import Imputer, StandardScaler, MinMaxScaler
 from sklearn.svm import SVC
+from sklearn.decomposition import PCA
+
 import numpy as np
 import pandas as pd
 import xgboost as xgb
 
-X_train = pd.read_csv('files/x_train.csv', sep=';')
+X_train = pd.read_csv('files/x_train.csv', sep=';').drop(['doReturnOnLowerLevels'], axis=1)
 y_train = pd.read_csv('files/y_train.csv', sep=';', header=None)
-pipe = make_pipeline(StandardScaler())
+pipe = make_pipeline(StandardScaler(), PCA(n_components=6, whiten=True))
 X_train_trans = pipe.fit_transform(X_train)
 y_train_trans = y_train[0].values
 X_train1, X_test1, y_train1, y_test1 = train_test_split(X_train_trans, y_train_trans, test_size=0.5, random_state=17)
@@ -22,7 +24,7 @@ space = {
     'min_child_weight': hp.quniform('x_min_child', 1, 10, 1),
     'subsample': hp.uniform('x_subsample', 0.7, 1),
     'n_estimators': hp.choice('x_n_estimators', np.arange(800, 10000, dtype=int)),
-    'learning_rate': hp.uniform('x_learning_rate', 0.001, 0.1)
+    'learning_rate': hp.uniform('x_learning_rate', 0.001, 0.3)
 }
 
 spaceSvm = {
@@ -71,5 +73,5 @@ def objective(space):
 
 if __name__ == "__main__":
     trials = Trials()
-    best = fmin( fn=objSVM, space=spaceSvm, algo=tpe.suggest, max_evals=25, trials=trials)
+    best = fmin( fn=objective, space=space, algo=tpe.suggest, max_evals=25, trials=trials)
     print(best)
