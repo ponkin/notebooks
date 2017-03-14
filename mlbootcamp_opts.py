@@ -8,12 +8,13 @@ from sklearn.preprocessing import Imputer, StandardScaler, MinMaxScaler
 from sklearn.svm import SVC
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
+from sklearn_helpers import CategoricalTransformer, DummyEncoder
 
 import numpy as np
 import pandas as pd
 import xgboost as xgb
 
-X_train = pd.read_csv('files/x_train.csv', sep=';').drop(['doReturnOnLowerLevels'], axis=1)
+X_train = pd.read_csv('files/x_train.csv', sep=';')
 y_train = pd.read_csv('files/y_train.csv', sep=';', header=None)
 X_train['averageLevelsPerDay'] = X_train['numberOfAttemptedLevels'] / X_train['numberOfDaysActuallyPlayed']
 X_train['averageAttemptsPerLevel'] = (X_train['totalNumOfAttempts'] - X_train['attemptsOnTheHighestLevel']) / (X_train['numberOfAttemptedLevels'] - 1)
@@ -25,15 +26,17 @@ X_train['stuckOnHighest'] = X_train['attemptsOnTheHighestLevel'] / X_train['aver
 X_train['minPlayerLevel'] = X_train['maxPlayerLevel']-((X_train['totalNumOfAttempts'] - X_train['attemptsOnTheHighestLevel']))
 X_train['playerLevelDelta'] = X_train['maxPlayerLevel'] - X_train['minPlayerLevel']
 X_train['avarageScorePerAttempt'] = X_train['avarageScorePerLevel']/X_train['averageAttemptsPerLevel']
+X_train['totalDays'] = (X_train['maxPlayerLevel'] - X_train['numberOfAttemptedLevels']) / X_train['averageLevelsPerDay']
+
 X_train = X_train.fillna(0)
-pipe = make_pipeline(StandardScaler())
+pipe = make_pipeline(CategoricalTransformer(['doReturnOnLowerLevels']), DummyEncoder(), StandardScaler())
 X_train_trans = pipe.fit_transform(X_train)
 y_train_trans = y_train[0].values
 
 space = {
     'max_depth': hp.choice('max_depth', np.arange(0, 10, dtype=int)),
     'min_child_weight': hp.quniform('x_min_child', 1, 10, 1),
-    'subsample': hp.uniform('x_subsample', 0.6, 1),
+    'subsample': hp.uniform('x_subsample', 0.3, 1),
     'n_estimators': hp.choice('x_n_estimators', np.arange(10, 300, dtype=int)),
     'learning_rate': hp.uniform('x_learning_rate', 0.0001, 0.9)
 }
