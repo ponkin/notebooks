@@ -27,6 +27,9 @@ X_train['minPlayerLevel'] = X_train['maxPlayerLevel']-((X_train['totalNumOfAttem
 X_train['playerLevelDelta'] = X_train['maxPlayerLevel'] - X_train['minPlayerLevel']
 X_train['avarageScorePerAttempt'] = X_train['avarageScorePerLevel']/X_train['averageAttemptsPerLevel']
 X_train['totalDays'] = (X_train['maxPlayerLevel'] - X_train['numberOfAttemptedLevels']) / X_train['averageLevelsPerDay']
+X_train['averageScorePerDay'] = X_train['totalScore'] / X_train['numberOfDaysActuallyPlayed']
+X_train['averageBonusScorePerDay'] = X_train['totalBonusScore']/X_train['numberOfDaysActuallyPlayed']
+X_train['totalNumOfTurns'] = X_train['averageNumOfTurnsPerCompletedLevel']*X_train['numberOfAttemptedLevels']
 
 X_train = X_train.fillna(0)
 pipe = make_pipeline(CategoricalTransformer(['doReturnOnLowerLevels']), DummyEncoder(), StandardScaler())
